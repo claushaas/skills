@@ -890,12 +890,20 @@ async function handleWellKnownSkills(
 
   // Track installation
   const sourceIdentifier = wellKnownProvider.getSourceIdentifier(url);
+
+  // Build skillFiles map: { skillName: sourceUrl }
+  const skillFiles: Record<string, string> = {};
+  for (const skill of selectedSkills) {
+    skillFiles[skill.installName] = skill.sourceUrl;
+  }
+
   track({
     event: 'install',
     source: sourceIdentifier,
     skills: selectedSkills.map((s) => s.installName).join(','),
     agents: targetAgents.join(','),
     ...(installGlobally && { global: '1' }),
+    skillFiles: JSON.stringify(skillFiles),
     sourceType: 'well-known',
   });
 
