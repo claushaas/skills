@@ -131,12 +131,16 @@ async function createFileSymlinks(target: string, linkPath: string): Promise<boo
       if (entry.isDirectory()) {
         // Recursively handle subdirectories
         await createFileSymlinks(sourcePath, destPath);
-      } else if (entry.isFile()) {
+      } else if (entry.isFile() || entry.isSymbolicLink()) {
         // Create relative symlink to the file
+        // relative(from, to) computes path from 'from' to 'to'
+        // We want a symlink at destPath that points to sourcePath
+        // So we compute relative path from linkPath (directory containing the symlink) to sourcePath
         const relativeSource = relative(linkPath, sourcePath);
         await symlink(relativeSource, destPath, 'file');
       }
-      // Skip other types (symlinks, etc.)
+      // Note: If source contains symlinks, they will be symlinked (not followed)
+      // This preserves the symlink structure from the source
     }
 
     return true;

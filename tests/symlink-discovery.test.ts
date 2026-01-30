@@ -50,6 +50,19 @@ description: A test skill
     expect(result.success).toBe(true);
     expect(result.mode).toBe('symlink');
 
+    // Verify the structure created by createFileSymlinks
+    // The cursor directory should be a real directory (not a symlink)
+    const cursorSkillDir = join(testDir, '.cursor', 'skills', 'test-skill');
+    const { lstat } = await import('fs/promises');
+    const dirStat = await lstat(cursorSkillDir);
+    expect(dirStat.isDirectory()).toBe(true);
+    expect(dirStat.isSymbolicLink()).toBe(false);
+
+    // But the SKILL.md file inside should be a symlink
+    const skillMdPath = join(cursorSkillDir, 'SKILL.md');
+    const fileStat = await lstat(skillMdPath);
+    expect(fileStat.isSymbolicLink()).toBe(true);
+
     // List installed skills and verify it's found
     const installedSkills = await listInstalledSkills({
       cwd: testDir,
